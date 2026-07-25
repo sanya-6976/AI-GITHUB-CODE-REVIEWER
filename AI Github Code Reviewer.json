@@ -1,0 +1,362 @@
+{
+  "name": "AI Github Code Reviewer",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "sanya-6976",
+          "mode": "list",
+          "cachedResultName": "sanya-6976",
+          "cachedResultUrl": "https://github.com/sanya-6976"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-github-review-test",
+          "mode": "list",
+          "cachedResultName": "ai-github-review-test",
+          "cachedResultUrl": "https://github.com/sanya-6976/ai-github-review-test"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -96
+      ],
+      "id": "771647f2-c71f-41c9-a581-4d13acb68b48",
+      "name": "Github Trigger",
+      "webhookId": "022a186f-25e0-445a-b3e6-c8147e22922d",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "tyIL7MnnH5x4esIZ",
+          "name": "GitHub OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a891a987-454f-4646-ae2a-dfa1e1b1eaac",
+              "name": "Owner",
+              "value": "={{ $json.body.repository.owner.login }}",
+              "type": "string"
+            },
+            {
+              "id": "a7988661-c3ca-4a15-8faa-43ef627d0a43",
+              "name": "Repository",
+              "value": "={{ $json.body.repository.name }}",
+              "type": "string"
+            },
+            {
+              "id": "f20e16e8-93bd-49ff-ba51-081cc5d06a33",
+              "name": "PullRequestNumber",
+              "value": "={{ $json.body.number }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        -96
+      ],
+      "id": "dd6fbc03-9a37-4d3e-8228-daa062fdd51e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{$json.Owner}}/{{$json.Repository}}/pulls/{{$json.PullRequestNumber}}/files",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        352,
+        -96
+      ],
+      "id": "45b3b657-b234-46d4-886c-27066dd3fd71",
+      "name": "HTTP Request",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "tyIL7MnnH5x4esIZ",
+          "name": "GitHub OAuth2 API"
+        },
+        "httpHeaderAuth": {
+          "id": "H5KQnutVUnmAorsX",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e13a4ffb-c93c-4680-88c8-4da0f585e9c7",
+              "name": "FileName",
+              "value": "={{ $json.filename }}",
+              "type": "string"
+            },
+            {
+              "id": "43ff704c-67a9-4678-b51b-fde2804c2a31",
+              "name": "Patch",
+              "value": "={{ $json.patch }}",
+              "type": "string"
+            },
+            {
+              "id": "3a044df5-5d6a-469a-bb0b-2464c0f825e9",
+              "name": "Status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        -320
+      ],
+      "id": "dfa3d202-2af3-4ab3-accb-3de7c88b8c32",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Perform a professional engineering review of the following GitHub Pull Request.\n\nRepository:\n{{ $('Edit Fields').item.json.Repository }}\n\nPull Request Number:\n{{ $('Edit Fields').item.json.PullRequestNumber }}\n\nFile Name:\n{{ $json.FileName }}\n\nStatus:\n{{ $json.Status }}\n\nChanged Code:\n{{ $json.Patch }}\n\nReview ONLY the changed lines shown above.\n\nDo not make assumptions about code that is not present.\n\nProvide your review strictly using the required Markdown format.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are CodeGuardian AI, an elite Senior Staff Software Engineer and Principal Code Reviewer with expertise in software architecture, secure coding, scalable systems, clean code, testing, performance engineering, and production-grade software development.\n\nYour responsibility is to perform a comprehensive GitHub Pull Request review based ONLY on the provided code diff.\n\n## General Instructions\n\n- Review ONLY the changed lines in the patch.\n- Never invent issues that are not present.\n- Explain WHY each issue matters.\n- Suggest practical fixes whenever possible.\n- Be concise, professional, and constructive.\n- Praise good engineering practices when appropriate.\n- Prioritize production readiness over style preferences.\n\nYour review should evaluate the following areas:\n\n### 🔒 Security\nReview for:\n- OWASP Top 10 vulnerabilities\n- Authentication & Authorization flaws\n- SQL Injection\n- Command Injection\n- Cross-Site Scripting (XSS)\n- Cross-Site Request Forgery (CSRF)\n- Insecure Deserialization\n- Path Traversal\n- Sensitive data exposure\n- Hardcoded secrets or API keys\n- Weak encryption or hashing\n- Missing input validation\n- Unsafe API usage\n- Privilege escalation risks\n\n### ⚡ Performance\nReview for:\n- Time complexity\n- Space complexity\n- Inefficient loops\n- Unnecessary object creation\n- Memory leaks\n- Blocking operations\n- Expensive database queries\n- Missing caching opportunities\n- Concurrency issues\n- Thread safety\n- Scalability concerns\n\n### 🧹 Clean Code & Maintainability\nReview for:\n- Readability\n- Naming conventions\n- SOLID principles\n- DRY principle\n- KISS principle\n- Code duplication\n- Long methods\n- Dead code\n- Maintainability\n- Proper abstraction\n- Modular design\n- Error handling\n- Logging quality\n\n### 🏗 Architecture & Design\nReview for:\n- Design patterns\n- Separation of concerns\n- Dependency management\n- Layered architecture\n- API design\n- Scalability\n- Extensibility\n- Code organization\n\n### 🧪 Testing\nReview for:\n- Missing unit tests\n- Missing integration tests\n- Edge cases\n- Null handling\n- Boundary conditions\n- Exception handling\n- Testability\n- Mocking opportunities\n\n### 📚 Documentation\nReview for:\n- Missing comments where necessary\n- Missing JavaDocs/API documentation\n- Poor variable or method descriptions\n\n## Response Format\n\nReturn ONLY Markdown.\n\n# 📋 Executive Summary\n\nSummarize the pull request in 2–4 sentences.\n\n# 🔴 Critical Issues\n\nList production-blocking bugs, crashes, security vulnerabilities, or severe logic issues.\n\nIf none write:\n\nNo critical issues found.\n\n# 🟠 High Severity Issues\n\nList significant maintainability or reliability issues.\n\n# 🟡 Medium Severity Issues\n\nList moderate improvements.\n\n# 🟢 Low Severity Issues\n\nList stylistic or minor improvements.\n\n# 🔒 Security Review\n\nProvide findings.\n\nIf none write:\n\nNo security issues detected.\n\n# ⚡ Performance Review\n\nProvide optimization suggestions.\n\nIf none write:\n\nNo significant performance concerns.\n\n# 🧹 Code Quality Review\n\nReview readability, maintainability, and engineering practices.\n\n# 🏗 Architecture Review\n\nSuggest architectural improvements if applicable.\n\n# 🧪 Testing Review\n\nRecommend missing unit tests, integration tests, edge cases, and validation scenarios.\n\n# 📚 Documentation Review\n\nSuggest missing documentation or comments.\n\n# 💡 Best Practices\n\nList engineering recommendations.\n\n# ⭐ Positive Feedback\n\nHighlight strengths of the implementation.\n\n# 📊 Review Statistics\n\nFiles Reviewed:\nCritical:\nHigh:\nMedium:\nLow:\nSuggestions:\nOverall Score: X/10\n\n# 📈 Engineering Scorecard\n\nSecurity: ★★★★★\n\nPerformance: ★★★★★\n\nCode Quality: ★★★★★\n\nArchitecture: ★★★★★\n\nTesting: ★★★★★\n\nDocumentation: ★★★★★\n\nMaintainability: ★★★★★\n\nReadability: ★★★★★\n\nProduction Readiness: ★★★★★\n\n# 🚦 Pull Request Decision\n\nChoose ONLY ONE:\n\n✅ APPROVE\n\nOR\n\n❌ CHANGES REQUESTED\n\nExplain the decision briefly.\n\n# 🚀 Future Improvements\n\nSuggest 3–5 improvements that would make the implementation even better.\n\nEnd the review."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1104,
+        -96
+      ],
+      "id": "32ce8950-4a45-4e44-bc1b-abd0f8a83491",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        32
+      ],
+      "id": "b7acd001-08e3-48bb-a43b-5b61199a48a7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7ADvOdiJ0UqUi8L6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "createComment",
+        "owner": {
+          "__rl": true,
+          "value": "sanya-6976",
+          "mode": "list",
+          "cachedResultName": "sanya-6976",
+          "cachedResultUrl": "https://github.com/sanya-6976"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-github-review-test",
+          "mode": "list",
+          "cachedResultName": "ai-github-review-test",
+          "cachedResultUrl": "https://github.com/sanya-6976/ai-github-review-test"
+        },
+        "issueNumber": "={{ $('Edit Fields').item.json.PullRequestNumber }}",
+        "body": "={{ $('Basic LLM Chain').item.json.text }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1456,
+        -96
+      ],
+      "id": "b3f89426-e5a5-4a12-8cbc-048941f436b5",
+      "name": "Create a comment on an issue",
+      "webhookId": "2e37e279-aecd-457b-9185-baff053fa1a7",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "tyIL7MnnH5x4esIZ",
+          "name": "GitHub OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4b53e604-1751-484f-be99-31f725c7735c",
+              "leftValue": "={{ $json.filename }}",
+              "rightValue": "=.*\\.(java|py|js|ts|cpp|c|cs|go|rs|kt|swift)$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "a3a82a15-b3cd-41ae-b662-eba1b3f61945",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        880,
+        112
+      ],
+      "id": "ca3b0255-38c6-4d3f-88a6-5e992f6a16de",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Create a comment on an issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d77085ca-5d7c-4698-93a1-dd3c08a5bbbf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cb93d4286954f467951a7af38832f79c3cd087c4aaca251550c0897e28956ed7"
+  },
+  "nodeGroups": [],
+  "id": "T18uZP4gyFlCmQkD",
+  "tags": []
+}
