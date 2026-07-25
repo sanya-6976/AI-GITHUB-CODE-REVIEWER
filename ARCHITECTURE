@@ -1,0 +1,58 @@
+# Architecture
+
+## Components
+
+### GitHub Trigger
+
+Starts the workflow whenever a Pull Request event occurs.
+
+### Edit Fields
+
+Extracts:
+
+- Repository
+- Pull Request Number
+- Repository Owner
+
+### HTTP Request
+
+Retrieves changed files using the GitHub REST API.
+
+### IF Node
+
+Filters source code files based on file extensions.
+
+### Google Gemini
+
+Performs AI-powered code review.
+
+### GitHub Comment
+
+Publishes the generated review back to the Pull Request.
+
+---
+
+## Data Flow
+
+GitHub PR
+↓
+
+GitHub Trigger
+↓
+
+GitHub REST API
+↓
+
+Changed Files
+
+↓
+
+Gemini AI
+
+↓
+
+Markdown Review
+
+↓
+
+GitHub Comment
