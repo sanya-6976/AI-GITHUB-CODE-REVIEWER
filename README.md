@@ -1,4 +1,4 @@
-<img width="1855" height="665" alt="Screenshot 2026-07-25 135143" src="https://github.com/user-attachments/assets/11f048a7-3edc-480c-81ad-7022f379fc0c" /># 🤖 CodeGuardian AI
+# 🤖 CodeGuardian AI
 
 > An AI-powered GitHub Pull Request Reviewer built with **n8n**, **GitHub API**, and **Google Gemini**.
 
@@ -91,7 +91,7 @@ Pull Request Review
 ---
 
 ## 📸 Screenshot:-
-<img src=images/workflow>
+<img width="1855" height="665" alt="Screenshot 2026-07-25 135143" src="https://github.com/user-attachments/assets/11f048a7-3edc-480c-81ad-7022f379fc0c" />
 
 
 ---
